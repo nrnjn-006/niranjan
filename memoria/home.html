@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Home | Memoria</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: url('https://www.transparenttextures.com/patterns/diagonal-stripes.png'), linear-gradient(135deg, #ffafbd, #ffc3a0);
+      text-align: center;
+      padding: 50px 20px;
+      color: #333;
+    }
+    h1 { font-size: 2.5rem; color: #d7263d; }
+    p { font-size: 1.2rem; margin-bottom: 30px; }
+    button {
+      display: block;
+      width: 250px;
+      margin: 15px auto;
+      padding: 15px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      background: #d7263d;
+      color: white;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    button:hover { transform: scale(1.05); background: #b51e31; }
+  </style>
+</head>
+<body>
+  <h1>✨ Memoria ✨</h1>
+  <p>What would you like to do today?</p>
+  <button onclick="window.location.href='post-memory.html'">✍️ Post a Memory</button>
+  <button onclick="window.location.href='see-memories.html'">👀 See Memories</button>
+  <button onclick="window.location.href='profile.html'">🙍 View Profile</button>
+  <button>🚪 Logout</button>
+</body>
+</html>
