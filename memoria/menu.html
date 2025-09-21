@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Menu - Community Time Capsule</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header><h1>🌍 Community Time Capsule</h1></header>
+
+  <main>
+    <section>
+      <h2>Welcome <span id="userEmail"></span></h2>
+      <button onclick="location.href='see.html'">👀 See Memories Nearby</button>
+      <button onclick="location.href='post.html'">✍️ Post a Memory</button>
+      <button id="logoutBtn">Logout</button>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    setupMenuPage();
+  </script>
+</body>
+</html>
