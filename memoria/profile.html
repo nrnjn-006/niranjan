@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria - Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem;
+    }
+    .container {
+      width: 95%;
+      max-width: 600px;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 2rem;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    }
+    h1 {
+      text-align: center;
+      color: #444;
+      margin-bottom: 1rem;
+    }
+    .userinfo {
+      background: #f7f9fc;
+      padding: 1rem;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+    }
+    .userinfo p {
+      margin: 0.2rem 0;
+      color: #333;
+    }
+    .memories {
+      margin-top: 1rem;
+    }
+    .memory {
+      background: #fff;
+      border-radius: 12px;
+      padding: 1rem;
+      margin: 0.7rem 0;
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .memory p { margin: 0.3rem 0; }
+    .memory .visibility {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #666;
+    }
+    .delete-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #ff6f61;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 0.8rem;
+    }
+    .delete-btn:hover {
+      background: #e63946;
+    }
+    .nav {
+      margin-top: 2rem;
+      text-align: center;
+    }
+    .nav button {
+      margin: 0.5rem;
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      background: #667eea;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .nav button:hover { transform: scale(1.05); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>👤 My Profile</h1>
+
+    <div class="userinfo">
+      <p><strong>Email:</strong> <span id="userEmail"></span></p>
+      <p><strong>User ID:</strong> <span id="userId"></span></p>
+    </div>
+
+    <h2>My Memories</h2>
+    <div class="memories" id="memories"></div>
+
+    <div class="nav">
+      <button onclick="window.location.href='home.html'">🏠 Home</button>
+      <button onclick="logout()">🚪 Logout</button>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        document.getElementById("userEmail").innerText = user.email;
+        document.getElementById("userId").innerText = user.uid;
+        loadMemories(user.uid);
+      }
+    });
+
+    async function loadMemories(uid) {
+      const snap = await db.collection("memories")
+                           .where("userId", "==", uid)
+                           .orderBy("createdAt", "desc")
+                           .get();
+      let html = "";
+      snap.forEach(doc => {
+        const m = doc.data();
+        html += `<div class="memory">
+                   <p>${m.anonymity ? "<em>Anonymous</em>" : "You"}</p>
+                   <p>${m.text}</p>
+                   <p class="visibility">(${m.visibility.toUpperCase()})</p>
+                   <button class="delete-btn" onclick="deleteMemory('${doc.id}')">Delete</button>
+                 </div>`;
+      });
+      document.getElementById("memories").innerHTML = html || "<p>No memories yet.</p>";
+    }
+
+    async function deleteMemory(id) {
+      if (confirm("Delete this memory?")) {
+        await db.collection("memories").doc(id).delete();
+        alert("Memory deleted!");
+        location.reload();
+      }
+    }
+
+    function logout() {
+      auth.signOut().then(() => window.location.href = "login.html");
+    }
+  </script>
+</body>
+</html>
