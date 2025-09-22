@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nearby Memories</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #f6d365, #fda085);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 2rem 1rem;
+      background-attachment: fixed;
+      background-size: cover;
+    }
+    .list-container {
+      background: rgba(255,255,255,0.95);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 700px;
+      box-shadow: 0px 8px 25px rgba(0,0,0,0.25);
+      position: relative;
+      overflow: hidden;
+    }
+    .list-container::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      left: -40px;
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: rgba(253,160,133,0.25);
+    }
+    h2 {
+      text-align: center;
+      color: #ff7043;
+      margin-bottom: 1.5rem;
+    }
+    .memory-card {
+      background: linear-gradient(120deg, #fff1eb, #ace0f9);
+      margin: 1rem 0;
+      padding: 1rem 1.5rem;
+      border-radius: 16px;
+      box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .memory-card::after {
+      content: "✨";
+      position: absolute;
+      bottom: 10px;
+      right: 15px;
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+    .memory-card h4 {
+      margin: 0;
+      color: #333;
+    }
+    .memory-card p {
+      margin: 0.5rem 0;
+      color: #555;
+    }
+    .memory-card span {
+      font-size: 0.85rem;
+      color: #777;
+    }
+    .back-home {
+      display: block;
+      text-align: center;
+      margin-top: 1rem;
+      padding: 0.7rem;
+      background: #ff7043;
+      color: white;
+      text-decoration: none;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .back-home:hover {
+      background: #e64a19;
+    }
+  </style>
+</head>
+<body>
+  <div class="list-container">
+    <h2>📋 Memories Within 50m</h2>
+    <div class="memory-card">
+      <h4>🌸 Public Memory</h4>
+      <p>"I used to come here every evening during my college days. So many memories!"</p>
+      <span>Posted by: Anonymous</span>
+    </div>
+    <div class="memory-card">
+      <h4>🌟 Public Memory</h4>
+      <p>"Best picnic spot with my family last summer 💕"</p>
+      <span>Posted by: User123</span>
+    </div>
+    <div class="memory-card">
+      <h4>🔒 Private Memory</h4>
+      <p>"This is where I made a life-changing decision."</p>
+      <span>Posted by: You</span>
+    </div>
+    <a href="see-memories.html" class="back-home">⬅ Back</a>
+  </div>
+</body>
+</html>
