@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post Memory in AR</title>
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <style>
+    body, html { margin: 0; height: 100%; overflow: hidden; }
+    .overlay {
+      position: absolute;
+      top: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(255,255,255,0.85);
+      padding: 0.6rem 1.2rem;
+      border-radius: 10px;
+      font-family: 'Poppins', sans-serif;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .save-btn {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #ff4081;
+      color: white;
+      padding: 0.8rem 1.5rem;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      cursor: pointer;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay">👆 Tap anywhere to place your memory</div>
+  <button class="save-btn" id="saveBtn">💾 Save Memory</button>
+
+  <a-scene embedded arjs="sourceType: webcam;">
+    <a-entity id="markerContainer"></a-entity>
+    <a-camera></a-camera>
+  </a-scene>
+
+  <script>
+    let markerPlaced = false;
+    let markerEntity;
+
+    const scene = document.querySelector('a-scene');
+    scene.addEventListener('click', function (evt) {
+      if (markerPlaced) return; // Only allow one placement
+      const touch = evt.detail.intersection;
+      if (touch) {
+        markerEntity = document.createElement('a-sphere');
+        markerEntity.setAttribute('position', touch.point);
+        markerEntity.setAttribute('radius', 0.2);
+        markerEntity.setAttribute('color', '#ff4081');
+        document.getElementById('markerContainer').appendChild(markerEntity);
+        markerPlaced = true;
+        document.getElementById('saveBtn').style.display = "block";
+      }
+    });
+
+    document.getElementById('saveBtn').addEventListener('click', () => {
+      if (markerEntity) {
+        const pos = markerEntity.getAttribute('position');
+        const memory = {
+          text: "Sample memory text",
+          x: pos.x,
+          y: pos.y,
+          z: pos.z,
+        };
+        alert("Memory saved at: " + JSON.stringify(memory));
+        // TODO: send `memory` to Firebase here
+      }
+    });
+  </script>
+</body>
+</html>
+po
