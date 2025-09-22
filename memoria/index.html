@@ -1,11 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Memoria - Community Time Capsule</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+      color: white;
+      overflow: hidden;
+    }
+    .landing-container {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 3rem 2rem;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+      max-width: 500px;
+      animation: fadeIn 1s ease-in;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    h1 {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
+    }
+    .features {
+      margin: 2rem 0;
+    }
+    .feature {
+      display: inline-block;
+      margin: 0.5rem 1rem;
+      padding: 0.5rem 1rem;
+      background: rgba(255,255,255,0.2);
+      border-radius: 25px;
+      font-size: 0.9rem;
+    }
+    .cta-button {
+      padding: 1rem 2rem;
+      border: none;
+      border-radius: 50px;
+      background: linear-gradient(45deg, #ff4081, #ff6b6b);
+      color: white;
+      font-size: 1.2rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.3s, box-shadow 0.3s;
+      text-decoration: none;
+      display: inline-block;
+      margin: 0.5rem;
+    }
+    .cta-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(255, 64, 129, 0.4);
+    }
+    .demo-note {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      opacity: 0.7;
+    }
+  </style>
 </head>
 <body>
+  <div class="landing-container">
+    <h1>🌍 Memoria</h1>
+    <p class="subtitle">Community Time Capsule in AR</p>
     
+    <div class="features">
+      <div class="feature">📍 AR Memory Placement</div>
+      <div class="feature">👀 Discover Stories</div>
+      <div class="feature">💭 Share Moments</div>
+    </div>
+
+    <p>Leave digital memories at real-world locations and discover what others have shared!</p>
+    
+    <!-- Only way to move forward is button click -->
+    <a href="login.html" class="cta-button">🚀 Get Started</a>
+    
+    <div class="demo-note">
+      <p>🧪 This is a functional prototype<br>
+      All features work in demo mode!</p>
+    </div>
+  </div>
 </body>
 </html>
