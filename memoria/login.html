@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | Memoria</title>
+  <!-- Load Supabase BEFORE app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       margin: 0;
@@ -30,12 +32,18 @@
       color: #ff7e5f;
     }
     input {
-      width: 100%;
+      width: 90%;
       margin: 10px 0;
       padding: 12px;
       border: none;
       border-radius: 8px;
       font-size: 1rem;
+      border: 1px solid #ddd;
+    }
+    input:focus {
+      outline: none;
+      border-color: #ff7e5f;
+      box-shadow: 0 0 5px rgba(255, 126, 95, 0.3);
     }
     button {
       width: 100%;
@@ -47,22 +55,74 @@
       font-size: 1.1rem;
       cursor: pointer;
       margin-top: 10px;
+      transition: all 0.3s;
     }
-    button:hover { background: #eb5c40; }
+    button:hover { 
+      background: #eb5c40; 
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
     p { margin-top: 10px; }
     a { color: #ff7e5f; font-weight: bold; text-decoration: none; }
+    .demo-login {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .success {
+      color: green;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .quick-demo-btn {
+      margin-top: 10px; 
+      width: auto; 
+      padding: 8px 16px; 
+      font-size: 0.9rem;
+      background: #ffd700;
+      color: #333;
+    }
+    .quick-demo-btn:hover {
+      background: #ffed4e;
+      transform: translateY(-1px);
+    }
   </style>
 </head>
 <body>
   <div class="login-box">
     <h1>✨ Memoria ✨</h1>
     <h3>Login</h3>
-    <form>
-      <input type="email" placeholder="Email" required>
-      <input type="password" placeholder="Password" required>
-      <button type="submit">Login</button>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password" required>
+      <button type="submit" id="loginBtn">Login</button>
+      <div class="error" id="errorMsg"></div>
+      <div class="success" id="successMsg"></div>
     </form>
+    
+    <div class="demo-login">
+      <strong>🧪 Demo Mode</strong><br>
+      <small>Try Supabase login or use any email/password for demo!</small><br>
+      <button class="quick-demo-btn" onclick="quickLogin()">Quick Demo Login</button>
+    </div>
+    
     <p>No account? <a href="register.html">Register</a></p>
   </div>
+
+  <!-- Load app.js AFTER Supabase -->
+  <script src="app.js"></script>
 </body>
 </html>
