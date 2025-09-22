@@ -5,90 +5,110 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Memoria - Profile</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+  <!-- Load Supabase BEFORE app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      font-family: 'Nunito', sans-serif;
-      min-height: 100vh;
-      background: linear-gradient(135deg, #a1c4fd, #c2e9fb);
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      padding: 2rem;
+    body { 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Nunito', sans-serif; 
+      min-height: 100vh; 
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb); 
+      display: flex; 
+      justify-content: center; 
+      align-items: flex-start; 
+      padding: 2rem; 
     }
-    .container {
-      width: 95%;
-      max-width: 600px;
-      background: rgba(255, 255, 255, 0.95);
-      border-radius: 20px;
-      padding: 2rem;
-      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2);
+    .container { 
+      width: 95%; 
+      max-width: 600px; 
+      background: rgba(255, 255, 255, 0.95); 
+      border-radius: 20px; 
+      padding: 2rem; 
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.2); 
     }
-    h1 {
-      text-align: center;
-      color: #444;
-      margin-bottom: 1rem;
+    h1 { 
+      text-align: center; 
+      color: #444; 
+      margin-bottom: 1rem; 
     }
-    .userinfo {
-      background: #f7f9fc;
-      padding: 1rem;
-      border-radius: 12px;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 5px 12px rgba(0,0,0,0.1);
+    .userinfo { 
+      background: #f7f9fc; 
+      padding: 1rem; 
+      border-radius: 12px; 
+      margin-bottom: 1.5rem; 
+      box-shadow: 0 5px 12px rgba(0,0,0,0.1); 
     }
-    .userinfo p {
-      margin: 0.2rem 0;
-      color: #333;
+    .userinfo p { 
+      margin: 0.2rem 0; 
+      color: #333; 
     }
-    .memories {
-      margin-top: 1rem;
+    .memories { 
+      margin-top: 1rem; 
     }
-    .memory {
-      background: #fff;
-      border-radius: 12px;
-      padding: 1rem;
-      margin: 0.7rem 0;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-      position: relative;
+    .memory { 
+      background: #fff; 
+      border-radius: 12px; 
+      padding: 1rem; 
+      margin: 0.7rem 0; 
+      box-shadow: 0 6px 12px rgba(0,0,0,0.1); 
+      position: relative; 
     }
-    .memory p { margin: 0.3rem 0; }
-    .memory .visibility {
-      font-size: 0.85rem;
-      font-weight: bold;
-      color: #666;
+    .memory p { 
+      margin: 0.3rem 0; 
     }
-    .delete-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: #ff6f61;
-      border: none;
-      padding: 6px 10px;
-      border-radius: 8px;
-      color: white;
-      cursor: pointer;
-      font-size: 0.8rem;
+    .memory .visibility { 
+      font-size: 0.85rem; 
+      font-weight: bold; 
+      color: #666; 
     }
-    .delete-btn:hover {
-      background: #e63946;
+    .delete-btn { 
+      position: absolute; 
+      top: 10px; 
+      right: 10px; 
+      background: #ff6f61; 
+      border: none; 
+      padding: 6px 10px; 
+      border-radius: 8px; 
+      color: white; 
+      cursor: pointer; 
+      font-size: 0.8rem; 
     }
-    .nav {
-      margin-top: 2rem;
-      text-align: center;
+    .delete-btn:hover { 
+      background: #e63946; 
     }
-    .nav button {
-      margin: 0.5rem;
-      padding: 12px 18px;
-      border: none;
-      border-radius: 12px;
-      background: #667eea;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      transition: transform 0.2s;
+    .nav { 
+      margin-top: 2rem; 
+      text-align: center; 
     }
-    .nav button:hover { transform: scale(1.05); }
+    .nav button { 
+      margin: 0.5rem; 
+      padding: 12px 18px; 
+      border: none; 
+      border-radius: 12px; 
+      background: #667eea; 
+      color: white; 
+      font-weight: bold; 
+      cursor: pointer; 
+      transition: transform 0.2s; 
+    }
+    .nav button:hover { 
+      transform: scale(1.05); 
+    }
+    .loading { 
+      text-align: center; 
+      color: #666; 
+      font-style: italic; 
+      padding: 2rem; 
+    }
+    .error { 
+      color: #e63946; 
+      text-align: center; 
+      padding: 1rem; 
+      background: rgba(230, 57, 70, 0.1); 
+      border-radius: 8px; 
+      margin: 1rem 0; 
+    }
   </style>
 </head>
 <body>
@@ -96,12 +116,15 @@
     <h1>👤 My Profile</h1>
 
     <div class="userinfo">
-      <p><strong>Email:</strong> <span id="userEmail"></span></p>
-      <p><strong>User ID:</strong> <span id="userId"></span></p>
+      <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+      <p><strong>Name:</strong> <span id="userName">Loading...</span></p>
+      <p><strong>User ID:</strong> <span id="userId">Loading...</span></p>
     </div>
 
     <h2>My Memories</h2>
-    <div class="memories" id="memories"></div>
+    <div class="memories" id="memories">
+      <div class="loading">Loading your memories...</div>
+    </div>
 
     <div class="nav">
       <button onclick="window.location.href='home.html'">🏠 Home</button>
@@ -109,58 +132,100 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore.js"></script>
+  <!-- Load app.js AFTER Supabase -->
+  <script src="app.js"></script>
   <script>
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT.firebaseapp.com",
-      projectId: "YOUR_PROJECT"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
+    async function loadProfile() {
+      console.log('📊 Loading profile...');
+      
+      try {
+        // Check authentication
+        const user = await checkAuthState();
+        if (!user) {
+          alert("Please log in first!");
+          window.location.href = "login.html";
+          return;
+        }
 
-    auth.onAuthStateChanged(user => {
-      if (!user) {
+        // Update user info
+        document.getElementById("userEmail").innerText = user.email || 'Unknown';
+        document.getElementById("userName").innerText = 
+          user.user_metadata?.full_name || user.name || user.email?.split('@')[0] || 'Unknown';
+        document.getElementById("userId").innerText = user.id || 'Unknown';
+
+        // Load user's memories
+        await loadUserMemories(user);
+
+      } catch (error) {
+        console.error('Failed to load profile:', error);
+        document.getElementById("memories").innerHTML = 
+          '<div class="error">Error loading profile: ' + error.message + '</div>';
+      }
+    }
+
+    async function loadUserMemories(user) {
+      const memoriesDiv = document.getElementById("memories");
+      
+      try {
+        // Get user's location for filtering
+        const location = await getCurrentLocation();
+        
+        // Get all memories (will be filtered by user ID in the function)
+        const result = await getMemoriesNearLocation(location.lat, location.lng, 10000); // Large radius to get all
+        
+        if (!result.success) {
+          throw new Error(result.error);
+        }
+
+        // Filter to only user's memories
+        const userMemories = result.data.filter(memory => memory.user_id === user.id);
+
+        if (!userMemories.length) {
+          memoriesDiv.innerHTML = '<div class="loading">No memories yet. Go create some!</div>';
+          return;
+        }
+
+        // Sort by creation date (newest first)
+        userMemories.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+        const memHtml = userMemories.map(memory => `
+          <div class="memory">
+            <p><strong>"${memory.text}"</strong></p>
+            <p class="visibility">
+              ${memory.visibility?.toUpperCase() || 'PUBLIC'} • 
+              ${memory.is_anonymous ? 'Anonymous' : 'Named'} • 
+              ${new Date(memory.created_at).toLocaleDateString()}
+            </p>
+            ${memory.latitude && memory.longitude ? 
+              `<p><small>📍 ${memory.latitude.toFixed(4)}, ${memory.longitude.toFixed(4)}</small></p>` : 
+              ''
+            }
+          </div>
+        `).join("");
+
+        memoriesDiv.innerHTML = memHtml;
+
+      } catch (error) {
+        console.error('Failed to load memories:', error);
+        memoriesDiv.innerHTML = '<div class="error">Error loading memories: ' + error.message + '</div>';
+      }
+    }
+
+    async function logout() {
+      console.log('🚪 Logging out from profile...');
+      const result = await logoutUser();
+      if (result.success) {
         window.location.href = "login.html";
       } else {
-        document.getElementById("userEmail").innerText = user.email;
-        document.getElementById("userId").innerText = user.uid;
-        loadMemories(user.uid);
+        alert("Logout failed: " + result.error);
       }
+    }
+
+    // Initialize when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('📄 Profile page loaded');
+      loadProfile();
     });
-
-    async function loadMemories(uid) {
-      const snap = await db.collection("memories")
-                           .where("userId", "==", uid)
-                           .orderBy("createdAt", "desc")
-                           .get();
-      let html = "";
-      snap.forEach(doc => {
-        const m = doc.data();
-        html += `<div class="memory">
-                   <p>${m.anonymity ? "<em>Anonymous</em>" : "You"}</p>
-                   <p>${m.text}</p>
-                   <p class="visibility">(${m.visibility.toUpperCase()})</p>
-                   <button class="delete-btn" onclick="deleteMemory('${doc.id}')">Delete</button>
-                 </div>`;
-      });
-      document.getElementById("memories").innerHTML = html || "<p>No memories yet.</p>";
-    }
-
-    async function deleteMemory(id) {
-      if (confirm("Delete this memory?")) {
-        await db.collection("memories").doc(id).delete();
-        alert("Memory deleted!");
-        location.reload();
-      }
-    }
-
-    function logout() {
-      auth.signOut().then(() => window.location.href = "login.html");
-    }
   </script>
 </body>
 </html>
