@@ -6,32 +6,703 @@
   <title>See Memories AR</title>
   <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <!-- Supabase JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.33.0/dist/supabase.min.js"></script>
   <style>
-    body, html { margin: 0; height: 100%; overflow: hidden; }
+    body, html { 
+      margin: 0; 
+      height: 100%; 
+      overflow: hidden; 
+      font-family: 'Poppins', sans-serif;
+    }
+    
     .header {
-      position: absolute;
+      position: fixed;
       top: 15px;
       left: 50%;
       transform: translateX(-50%);
       padding: 12px 20px;
       border-radius: 12px;
-      font-family: 'Poppins', sans-serif;
       font-size: 1rem;
       font-weight: 600;
       color: white;
       background: linear-gradient(135deg, #6a11cb, #2575fc);
       box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-      z-index: 10;
+      z-index: 100;
       text-align: center;
       letter-spacing: 0.5px;
+      max-width: 90%;
+    }
+    
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,64,129,0.9);
+      color: white;
+      border: none;
+      padding: 0.8rem 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      z-index: 100;
+      font-size: 1rem;
+    }
+    
+    .memory-count {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      z-index: 100;
+      font-size: 0.9rem;
+    }
+    
+    .loading {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      z-index: 1000;
+      text-align: center;
+    }
+    
+    .no-memories {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,255,255,0.95);
+      padding: 30px;
+      border-radius: 15px;
+      z-index: 1000;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      max-width: 80%;
+    }
+
+    .error-message {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255,0,0,0.9);
+      color: white;
+      padding: 20px;
+      border-radius: 15px;
+      z-index: 1000;
+      text-align: center;
+      max-width: 80%;
+    }
+
+    /* Camera feed styling */
+    video {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1;
+    }
+
+    .memory-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .memory-modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 400px;
+      text-align: left;
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .close-modal {
+      width: 100%;
+      padding: 0.8rem;
+      background: #ff4081;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 1rem;
+      font-size: 1rem;
     }
   </style>
 </head>
 <body>
-  <div class="header">📍 Scan area to find memories</div>
+  <!-- Back button -->
+  <button class="back-btn" onclick="window.location.href='see-memories.html'">← Back</button>
+  
+  <!-- Header -->
+  <div class="header" id="header">Initializing AR...</div>
+  
+  <!-- Memory count -->
+  <div class="memory-count" id="memoryCount" style="display: none;">0 memories found</div>
+  
+  <!-- Loading indicator -->
+  <div class="loading" id="loading">
+    Loading memories...<br>
+    <small>Getting your location and nearby memories...</small>
+  </div>
+  
+  <!-- Error message -->
+  <div class="error-message" id="errorMessage" style="display: none;">
+    <h3>Error Loading Memories</h3>
+    <p id="errorText">Something went wrong.</p>
+    <button onclick="retryLoading()" style="
+      background: white;
+      color: #ff0000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px 5px;
+    ">Retry</button>
+    <button onclick="window.location.href='see-memories.html'" style="
+      background: white;
+      color: #ff0000;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px 5px;
+    ">Back</button>
+  </div>
+  
+  <!-- No memories message -->
+  <div class="no-memories" id="noMemories" style="display: none;">
+    <h3>🔍 No memories found nearby</h3>
+    <p>There are no memories within 50 meters of your current location.</p>
+    <p><strong>Want to be the first?</strong></p>
+    <button onclick="window.location.href='post-memory.html'" style="
+      background: #ff4081;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px 5px;
+      font-size: 1rem;
+    ">✍ Create Memory</button>
+    <button onclick="window.location.href='see-memories.html'" style="
+      background: #ccc;
+      color: #333;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 10px;
+      cursor: pointer;
+      margin: 10px 5px;
+      font-size: 1rem;
+    ">← Back</button>
+  </div>
 
-  <a-scene embedded arjs="sourceType: webcam;">
-    <a-camera></a-camera>
+  <!-- Camera feed -->
+  <video id="video" autoplay playsinline muted></video>
+
+  <!-- A-Frame Scene -->
+  <a-scene 
+    id="arScene"
+    embedded 
+    arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;"
+    style="display: none;"
+  >
+    <a-camera 
+      id="camera"
+      arjs-device-orientation-controls="smoothingFactor: 0.1"
+      look-controls-enabled="false"
+      arjs-look-controls="smoothingFactor: 0.7"
+    ></a-camera>
   </a-scene>
+
+  <!-- Memory Detail Modal -->
+  <div class="memory-modal" id="memoryModal">
+    <div class="memory-modal-content" id="memoryModalContent">
+      <!-- Content will be populated by JavaScript -->
+    </div>
+  </div>
+
+  <!-- Load the app.js first -->
+  <script src="app.js"></script>
+  <script>
+    let memories = [];
+    let arScene = null;
+    let camera = null;
+    let isInitialized = false;
+    let userLocation = null;
+    let currentUser = null;
+
+    // Initialize the AR memory viewer
+    async function initializeArMemoryViewer() {
+      console.log('🚀 Initializing AR memory viewer...');
+      
+      try {
+        // Show loading message
+        showLoading('Checking authentication...');
+        
+        // Check authentication first
+        currentUser = await checkAuthState();
+        if (!currentUser) {
+          console.log('❌ User not authenticated, redirecting to login');
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        console.log('✅ User authenticated:', currentUser.email);
+        showLoading('Getting your location...');
+        
+        // Get user location
+        userLocation = await getCurrentLocation();
+        console.log('✅ User location obtained:', userLocation);
+        
+        showLoading('Loading nearby memories...');
+        
+        // Load nearby memories
+        const result = await getMemoriesNearLocation(
+          userLocation.lat, 
+          userLocation.lng, 
+          50 // 50 meter radius
+        );
+        
+        console.log('📍 Memories query result:', result);
+        
+        if (result.success) {
+          memories = result.data || [];
+          console.log(`✅ Loaded ${memories.length} memories`);
+          
+          // Update UI
+          updateUI();
+          
+          // Initialize camera and AR if we have memories
+          if (memories.length > 0) {
+            showLoading('Starting camera and AR...');
+            const cameraSuccess = await initializeCamera();
+            if (cameraSuccess) {
+              await initializeAR();
+            }
+          } else {
+            showNoMemories();
+          }
+        } else {
+          console.error('❌ Failed to load memories:', result.error);
+          showError('Failed to load memories: ' + result.error);
+        }
+        
+      } catch (error) {
+        console.error('❌ Error initializing AR viewer:', error);
+        showError('Error loading memories: ' + error.message);
+      } finally {
+        hideLoading();
+      }
+    }
+    
+    // Initialize camera
+    async function initializeCamera() {
+      try {
+        console.log('📷 Requesting camera access...');
+        
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: 'environment', // Back camera
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          }
+        });
+        
+        const video = document.getElementById('video');
+        video.srcObject = stream;
+        
+        console.log('✅ Camera initialized successfully');
+        return true;
+      } catch (error) {
+        console.error('❌ Camera initialization failed:', error);
+        showError('Camera access is required for AR functionality. Please allow camera access and refresh the page.');
+        return false;
+      }
+    }
+    
+    // Initialize AR scene
+    async function initializeAR() {
+      console.log('🎯 Initializing AR scene...');
+      
+      try {
+        arScene = document.getElementById('arScene');
+        camera = document.getElementById('camera');
+        
+        if (!arScene || !camera) {
+          throw new Error('AR elements not found in DOM');
+        }
+        
+        // Show AR scene
+        arScene.style.display = 'block';
+        
+        // Wait for scene to be ready
+        if (arScene.hasLoaded) {
+          console.log('✅ AR scene already loaded, placing memories...');
+          placeMemoriesInAR();
+          isInitialized = true;
+        } else {
+          arScene.addEventListener('loaded', () => {
+            console.log('✅ AR scene loaded event fired, placing memories...');
+            placeMemoriesInAR();
+            isInitialized = true;
+          });
+        }
+        
+        // Backup timeout in case loaded event doesn't fire
+        setTimeout(() => {
+          if (!isInitialized) {
+            console.log('⏰ AR scene timeout reached, placing memories anyway...');
+            placeMemoriesInAR();
+            isInitialized = true;
+          }
+        }, 3000);
+        
+      } catch (error) {
+        console.error('❌ AR initialization failed:', error);
+        showError('Failed to initialize AR: ' + error.message);
+      }
+    }
+    
+    // Place memories in AR space
+    function placeMemoriesInAR() {
+      console.log(`🎯 Placing ${memories.length} memories in AR...`);
+      
+      if (!arScene) {
+        console.error('❌ AR scene not available');
+        return;
+      }
+      
+      memories.forEach((memory, index) => {
+        try {
+          createMemoryEntity(memory, index);
+        } catch (error) {
+          console.error(`❌ Failed to create entity for memory ${memory.id}:`, error);
+        }
+      });
+      
+      console.log('✅ Memory entities created');
+    }
+    
+    // Create AR entity for a memory
+    function createMemoryEntity(memory, index) {
+      console.log(`🏗 Creating AR entity for memory: ${memory.id} - "${memory.text.substring(0, 30)}..."`);
+      
+      // Create main container
+      const memoryEntity = document.createElement('a-entity');
+      memoryEntity.setAttribute('id', `memory-${memory.id}`);
+      
+      // Position calculation
+      let position;
+      if (memory.ar_position_x !== null && memory.ar_position_y !== null && memory.ar_position_z !== null) {
+        // Use stored AR position
+        position = `${memory.ar_position_x} ${memory.ar_position_y} ${memory.ar_position_z}`;
+        console.log('📍 Using stored AR position:', position);
+      } else {
+        // Calculate position based on GPS coordinates
+        const distance = calculateDistance(
+          userLocation.lat, userLocation.lng,
+          memory.latitude, memory.longitude
+        );
+        
+        // Convert to AR coordinates
+        const angle = Math.atan2(
+          memory.longitude - userLocation.lng,
+          memory.latitude - userLocation.lat
+        );
+        
+        const arDistance = Math.min(distance / 10, 8); // Scale down distance, max 8 units
+        const x = Math.sin(angle) * arDistance;
+        const z = -Math.cos(angle) * arDistance; // Negative Z is forward
+        const y = 0.5 + (index * 0.2); // Vary height slightly to avoid overlap
+        
+        position = `${x.toFixed(2)} ${y.toFixed(2)} ${z.toFixed(2)}`;
+        console.log('🧮 Calculated AR position:', position, 'from distance:', distance.toFixed(2) + 'm');
+      }
+      
+      memoryEntity.setAttribute('position', position);
+      
+      // Create sphere indicator
+      const sphere = document.createElement('a-sphere');
+      let color;
+      
+      // Color coding: user's own memories, private memories, public memories
+      if (memory.user_id === currentUser?.id) {
+        color = '#4ecdc4'; // Teal for user's own memories
+      } else if (memory.visibility === 'private') {
+        color = '#ff6b6b'; // Red for private (shouldn't normally see these)
+      } else {
+        color = '#ffa726'; // Orange for public memories
+      }
+      
+      sphere.setAttribute('radius', '0.15');
+      sphere.setAttribute('color', color);
+      sphere.setAttribute('opacity', '0.9');
+      sphere.setAttribute('metalness', '0.1');
+      sphere.setAttribute('roughness', '0.4');
+      
+      // Add floating animation
+      sphere.setAttribute('animation__float', {
+        property: 'position',
+        to: '0 0.1 0',
+        dir: 'alternate',
+        repeat: 'indefinite',
+        dur: 2000,
+        easing: 'easeInOutSine'
+      });
+      
+      // Add rotation animation
+      sphere.setAttribute('animation__rotate', {
+        property: 'rotation',
+        to: '0 360 0',
+        loop: true,
+        dur: 20000
+      });
+      
+      // Create text label background
+      const textBg = document.createElement('a-plane');
+      textBg.setAttribute('position', '0 0.35 0');
+      textBg.setAttribute('width', '2.5');
+      textBg.setAttribute('height', '0.8');
+      textBg.setAttribute('color', '#ffffff');
+      textBg.setAttribute('opacity', '0.9');
+      textBg.setAttribute('look-at', '[camera]');
+      
+      // Create text label
+      const textLabel = document.createElement('a-text');
+      const displayName = memory.is_anonymous ? 'Anonymous' : (
+        memory.user_id === currentUser?.id ? 'You' : 'Someone'
+      );
+      const shortText = memory.text.length > 35 ? 
+                       memory.text.substring(0, 35) + '...' : 
+                       memory.text;
+      
+      textLabel.setAttribute('value', `"${shortText}"\n- ${displayName}`);
+      textLabel.setAttribute('position', '0 0.35 0.01');
+      textLabel.setAttribute('align', 'center');
+      textLabel.setAttribute('color', '#333333');
+      textLabel.setAttribute('width', '6');
+      textLabel.setAttribute('wrap-count', '25');
+      textLabel.setAttribute('look-at', '[camera]');
+      textLabel.setAttribute('font', 'dejavu');
+      
+      // Add pulsing effect to sphere
+      const pulseAnimation = document.createElement('a-animation');
+      pulseAnimation.setAttribute('attribute', 'scale');
+      pulseAnimation.setAttribute('to', '1.3 1.3 1.3');
+      pulseAnimation.setAttribute('direction', 'alternate');
+      pulseAnimation.setAttribute('repeat', 'indefinite');
+      pulseAnimation.setAttribute('dur', '3000');
+      pulseAnimation.setAttribute('easing', 'easeInOutQuad');
+      
+      sphere.appendChild(pulseAnimation);
+      
+      // Add click interaction
+      memoryEntity.setAttribute('class', 'clickable');
+      memoryEntity.addEventListener('click', (e) => {
+        e.stopPropagation();
+        console.log('🔍 Memory clicked:', memory.id);
+        showMemoryDetails(memory);
+      });
+      
+      // Add cursor interaction for mobile
+      memoryEntity.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('👆 Memory touched:', memory.id);
+        showMemoryDetails(memory);
+      });
+      
+      // Assemble entity
+      memoryEntity.appendChild(sphere);
+      memoryEntity.appendChild(textBg);
+      memoryEntity.appendChild(textLabel);
+      
+      // Add to scene
+      arScene.appendChild(memoryEntity);
+      
+      console.log('✅ Memory entity created and added to scene');
+    }
+    
+    // Show detailed memory information
+    function showMemoryDetails(memory) {
+      console.log('📖 Showing details for memory:', memory.id);
+      
+      const modal = document.getElementById('memoryModal');
+      const modalContent = document.getElementById('memoryModalContent');
+      
+      const displayName = memory.is_anonymous ? 'Anonymous' : (
+        memory.user_id === currentUser?.id ? 'You' : 'Someone'
+      );
+      const isOwner = currentUser && memory.user_id === currentUser.id;
+      
+      const createdDate = memory.created_at ? 
+        new Date(memory.created_at).toLocaleDateString() : 
+        'Unknown date';
+      
+      modalContent.innerHTML = `
+        <h3 style="margin-top: 0; color: #333; text-align: center;">💭 Memory Details</h3>
+        <div style="margin: 1.5rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; border-left: 4px solid #ff4081;">
+          <p style="margin: 0; font-size: 1.1rem; color: #333; line-height: 1.4; font-style: italic;">"${memory.text}"</p>
+        </div>
+        <div style="color: #666; font-size: 0.9rem; border-top: 1px solid #eee; padding-top: 1rem; line-height: 1.6;">
+          <p style="margin: 0.3rem 0;"><strong>👤 Author:</strong> ${isOwner ? 'You' : displayName}</p>
+          <p style="margin: 0.3rem 0;"><strong>🌍 Visibility:</strong> ${memory.visibility || 'public'}</p>
+          <p style="margin: 0.3rem 0;"><strong>📅 Created:</strong> ${createdDate}</p>
+          ${memory.latitude && memory.longitude ? 
+            `<p style="margin: 0.3rem 0;"><strong>📍 Location:</strong> ${memory.latitude.toFixed(4)}, ${memory.longitude.toFixed(4)}</p>` : ''
+          }
+          <p style="margin: 0.3rem 0;"><strong>📏 Distance:</strong> ${
+            calculateDistance(userLocation.lat, userLocation.lng, memory.latitude, memory.longitude).toFixed(1)
+          } meters away</p>
+        </div>
+        <button class="close-modal" onclick="closeMemoryModal()">Close</button>
+      `;
+      
+      modal.style.display = 'flex';
+    }
+    
+    // Close memory modal
+    window.closeMemoryModal = function() {
+      const modal = document.getElementById('memoryModal');
+      modal.style.display = 'none';
+    };
+    
+    // Update UI elements
+    function updateUI() {
+      const header = document.getElementById('header');
+      const memoryCount = document.getElementById('memoryCount');
+      
+      if (memories.length > 0) {
+        header.textContent = `Found ${memories.length} memories nearby`;
+        memoryCount.textContent = `${memories.length} memories found`;
+        memoryCount.style.display = 'block';
+      } else {
+        header.textContent = 'No memories found in this area';
+      }
+    }
+    
+    // Show loading message
+    function showLoading(message) {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.innerHTML = `${message}<br><small>Please wait...</small>`;
+        loading.style.display = 'block';
+      }
+    }
+    
+    // Show no memories message
+    function showNoMemories() {
+      hideLoading();
+      hideError();
+      document.getElementById('noMemories').style.display = 'block';
+      document.getElementById('video').style.display = 'none';
+    }
+    
+    // Show error message
+    function showError(message) {
+      hideLoading();
+      const errorDiv = document.getElementById('errorMessage');
+      const errorText = document.getElementById('errorText');
+      
+      if (errorDiv && errorText) {
+        errorText.textContent = message;
+        errorDiv.style.display = 'block';
+      }
+      
+      // Hide video if showing error
+      document.getElementById('video').style.display = 'none';
+    }
+    
+    // Hide loading indicator
+    function hideLoading() {
+      const loading = document.getElementById('loading');
+      if (loading) {
+        loading.style.display = 'none';
+      }
+    }
+    
+    // Hide error message
+    function hideError() {
+      const errorDiv = document.getElementById('errorMessage');
+      if (errorDiv) {
+        errorDiv.style.display = 'none';
+      }
+    }
+    
+    // Retry loading function
+    window.retryLoading = function() {
+      console.log('🔄 Retrying to load memories...');
+      hideError();
+      hideLoading();
+      document.getElementById('noMemories').style.display = 'none';
+      document.getElementById('video').style.display = 'block';
+      
+      // Reset state
+      memories = [];
+      isInitialized = false;
+      
+      // Clear existing memory entities
+      if (arScene) {
+        const existingMemories = arScene.querySelectorAll('[id^="memory-"]');
+        existingMemories.forEach(entity => {
+          arScene.removeChild(entity);
+        });
+      }
+      
+      // Retry initialization
+      initializeArMemoryViewer();
+    };
+    
+    // Close modal when clicking outside
+    document.addEventListener('click', (e) => {
+      const modal = document.getElementById('memoryModal');
+      if (e.target === modal) {
+        closeMemoryModal();
+      }
+    });
+    
+    // Cleanup when leaving page
+    window.addEventListener('beforeunload', () => {
+      const video = document.getElementById('video');
+      if (video && video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+      }
+    });
+    
+    // Initialize when page loads
+    window.addEventListener('load', () => {
+      console.log('📱 Page loaded, initializing AR memory viewer...');
+      initializeArMemoryViewer();
+    });
+    
+    // Backup initialization with DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', () => {
+      if (!isInitialized) {
+        console.log('📄 DOM loaded, initializing AR memory viewer...');
+        setTimeout(initializeArMemoryViewer, 500);
+      }
+    });
+  </script>
 </body>
 </html>
