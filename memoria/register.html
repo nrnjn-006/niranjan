@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Register | Memoria</title>
+  <!-- Load Supabase BEFORE app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
       margin: 0;
@@ -25,11 +27,17 @@
     }
     h1 { margin-bottom: 10px; color: #2575fc; }
     input {
-      width: 100%;
+      width: 90%;
       margin: 10px 0;
       padding: 12px;
       border-radius: 8px;
-      border: none;
+      border: 1px solid #ddd;
+      font-size: 1rem;
+    }
+    input:focus {
+      outline: none;
+      border-color: #2575fc;
+      box-shadow: 0 0 5px rgba(37, 117, 252, 0.3);
     }
     button {
       width: 100%;
@@ -40,23 +48,63 @@
       color: #fff;
       font-size: 1.1rem;
       cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.3s;
     }
-    button:hover { background: #1258c5; }
+    button:hover { 
+      background: #1258c5; 
+      transform: translateY(-2px);
+    }
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
     p { margin-top: 15px; }
     a { color: #1258c5; font-weight: bold; text-decoration: none; }
+    .error {
+      color: red;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .success {
+      color: green;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+    }
+    .demo-info {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 215, 0, 0.1);
+      border-radius: 10px;
+      font-size: 0.9rem;
+    }
   </style>
 </head>
 <body>
   <div class="register-box">
     <h1>✨ Memoria ✨</h1>
     <h3>Create Account</h3>
-    <form>
-      <input type="text" placeholder="Full Name" required>
-      <input type="email" placeholder="Email" required>
-      <input type="password" placeholder="Password" required>
-      <button type="submit">Register</button>
+    <form id="registerForm">
+      <input type="text" id="fullName" placeholder="Full Name" required>
+      <input type="email" id="email" placeholder="Email" required>
+      <input type="password" id="password" placeholder="Password (min 6 characters)" required>
+      <button type="submit" id="registerBtn">Create Account</button>
+      <div class="error" id="errorMsg"></div>
+      <div class="success" id="successMsg"></div>
     </form>
-    <p>Already registered? <a href="login.html">Login</a></p>
+    
+    <div class="demo-info">
+      <strong>🧪 Demo Mode</strong><br>
+      <small>Registration works with Supabase or demo mode!</small>
+    </div>
+    
+    <p>Already have an account? <a href="login.html">Login</a></p>
   </div>
+
+  <!-- Load app.js AFTER Supabase -->
+  <script src="app.js"></script>
 </body>
 </html>
